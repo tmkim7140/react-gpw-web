@@ -16,7 +16,14 @@
             ],
             "@stores/*": [
                 "src/stores/*"
+            ],
+            "@styles/*": [
+                "src/styles/*"
+            ],
+            "@apis/*": [
+                "src/apis/*"
             ]
+            
         }
     }
 }
