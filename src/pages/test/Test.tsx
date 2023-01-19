@@ -71,6 +71,10 @@ function Test() {
             padding: [10, 10],
             layoutOption: {
                 margin: [10, 10],
+                minW: 1,
+                maxW: 5,
+                minH: 1,
+                maxH: 5,
             },
             isDraggable: true,
             isResizable: true,

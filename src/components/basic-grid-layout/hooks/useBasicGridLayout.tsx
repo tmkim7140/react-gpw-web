@@ -74,10 +74,10 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
                 responsiveLayouts[key] = layouts.map((layout: BasicLayoutProps) => (
                     Object.assign(layout.geometry[key], {
                         i: layout.id,
-                        minW: option?.minW == null ? undefined : option?.minW,
-                        maxW: option?.maxW == null ? undefined : option?.maxW,
-                        minH: option?.minH == null ? undefined : option?.minH,
-                        maxH: option?.maxH == null ? undefined : option?.maxH,
+                        minW: option?.layoutOption?.minW == null ? undefined : option?.layoutOption?.minW,
+                        maxW: option?.layoutOption?.maxW == null ? undefined : option?.layoutOption?.maxW,
+                        minH: option?.layoutOption?.minH == null ? undefined : option?.layoutOption?.minH,
+                        maxH: option?.layoutOption?.maxH == null ? undefined : option?.layoutOption?.maxH,
                     })
                 ));
             });
@@ -110,6 +110,8 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
 
     const handleClickAddBtn = (e: any) => {
         console.log('BasicGridLayout.handleClickAddBtn');
+        console.log(state.responsiveLayouts);
+        console.log(layouts);
     }
 
     const handleClickModifyBtn = (e: any) => {
