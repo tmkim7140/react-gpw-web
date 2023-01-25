@@ -1,3 +1,5 @@
+import './styles/main.scss';
+
 import useBasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps, BasicGridLayoutSaveEvent } from './hooks/useBasicGridLayout';
 
 import { BasicLayoutEvent, BasicLayoutProps, BasicLayoutTitleBarProps } from './hooks/useBasicLayout';
@@ -47,6 +49,7 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
                 innerJSX: layout.innerJSX,
                 titleBar: props.option?.titleBar,
                 isSelected: layout.isSelected,
+                isStatic: layout.isStatic,
                 hasMouseMoveArea: props.option?.hasMouseMoveArea,
                 onChangeTitle: handleChangeTitleFromLayout,
                 onChangeCheck: handleChangeCheckFromLayout,
@@ -58,7 +61,7 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
     }
 
     return (
-        <div style={{ width: '100%', height: '100%' }}>
+        <div className={props.option?.className != null ? props.option?.className : 'default-basic-grid-layout'}>
             <BasicGridLayoutUI
                 responsiveGridLayout={bglUIProps.responsiveGridLayout}
                 basicGridLayoutToolbar={bglUIProps.basicGridLayoutToolbar}

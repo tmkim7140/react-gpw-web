@@ -160,7 +160,7 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
                 xs: { x: 0, y: 0, w: 1, h: 1, static: false },
                 xxs: { x: 0, y: 0, w: 1, h: 1, static: false },
             },
-            innerJSX: (<div style={{ width: '100%', height: '100%', backgroundColor: '#44ff4455' }}>{id}</div>)
+            innerJSX: (<div>{id}</div>)
         }
         if (props.option?.breakpoints != null) {
             Object.keys(props.option.breakpoints).forEach(key => {
@@ -203,7 +203,6 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
         let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
         let optionClone: BasicGridLayoutOptionProps = _.cloneDeep(state.option);
 
-        console.log(props.layouts)
         layoutsClone.forEach((layout: BasicLayoutProps) => {
             delete layout.onChangeCheck;
             delete layout.onChangeTitle;
@@ -212,7 +211,6 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
             delete layout.isSelected;
             delete layout.isTemporary;
         });
-        console.log(layoutsClone)
 
         if (props.onSave != null) {
             let e: BasicGridLayoutSaveEvent = {

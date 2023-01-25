@@ -9,6 +9,7 @@ interface BasicLayoutUIProps {
     hasStaticBtn?: boolean;
     hasMouseMoveArea?: boolean;
     isSelected?: boolean;
+    isStatic?: boolean;
     onChangeTitle?: (e: any) => void
     onChangeCheck?: (e: any) => void;
     onClickRemoveButton?: (e: any) => void;
@@ -19,40 +20,41 @@ function BasicLayoutUI(props: BasicLayoutUIProps) {
     let title = _.cloneDeep(props.title);
 
     return (
-        <div style={{ width: '100%', height: '100%' }}>
+        <div className={'basic-layout'}>
             {
                 props.hasTitleBar != null && props.hasTitleBar ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '20px', backgroundColor: '#ffffffff', cursor: 'move' }}>
-                        <div className='title-area' style={{ display: 'flex', width: '70%' }}>
+                    <div className='bl-header cursor-move'>
+                        <div className='title-container'>
                             {
                                 props.hasCheckbox != null && props.hasCheckbox != null ? (
-                                    <input type={'checkbox'}
+                                    <input className={'checkbox-input'}
+                                        type={'checkbox'}
                                         checked={props.isSelected}
                                         onChange={props.onChangeCheck}
                                         onMouseDown={(e) => e.stopPropagation()} />
                                 ) : ('')
                             }
-                            <input style={{ width: '100%' }} value={title != null ? title : ''}
+                            <input className="title-input"
+                                value={title != null ? title : ''}
                                 onChange={(e) => props.onChangeTitle != null ? props.onChangeTitle(e) : ''}
                                 onMouseDown={(e) => e.stopPropagation()}
                                 disabled={title == null}></input>
                         </div>
-                        <div className='function-area' style={{ display: 'flex', justifyContent: 'flex-end', width: '30%' }}>
+
+                        <div className='tool-container'>
                             {
                                 props.hasDeleteBtn != null && props.hasDeleteBtn != null ? (
-                                    <button id='removeBtn'
-                                        style={{ height: '20px', backgroundColor: '#f0f0f0ff', border: '1px solid' }}
+                                    <button className="tool-btn trash-icon"
+                                        id='removeBtn'
                                         onClick={props.onClickRemoveButton} onMouseDown={(e) => e.stopPropagation()}>
-                                        d
                                     </button>
                                 ) : ('')
                             }
                             {
                                 props.hasStaticBtn != null ? (
-                                    <button id='staticBtn'
-                                        style={{ height: '20px', backgroundColor: '#f0f0f0ff', border: '1px solid' }}
+                                    <button className={`tool-btn pin-btn ${props.isStatic != null && props.isStatic ? 'pin-on-icon' : 'pin-off-icon'}`}
+                                        id='staticBtn'
                                         onClick={props.onClickStaticButton} onMouseDown={(e) => e.stopPropagation()}>
-                                        p
                                     </button>
                                 ) : ('')
                             }
@@ -60,17 +62,20 @@ function BasicLayoutUI(props: BasicLayoutUIProps) {
                     </div>
                 ) : ('')
             }
-            <div style={{ width: '100%', height: props.hasTitleBar != null && props.hasTitleBar ? 'calc(100% - 20px)' : '100%' }}
+
+            <div className={'bl-body'}
                 onMouseDown={(e) => e.stopPropagation()}
             >
                 {props.innerJSX}
             </div>
             {
                 props.hasMouseMoveArea != null && props.hasMouseMoveArea ? (
-                    <div style={{ position: 'absolute', right: '-9px', bottom: '-2px', cursor: 'move', color: '#00000088' }}>●</div>
+                    <div className="mouse-move-area cursor-move">
+                        ●
+                    </div>
                 ) : ('')
             }
-        </div >
+        </div>
     )
 }
 

@@ -1,4 +1,4 @@
-import BasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps, BasicGridLayoutSaveEvent, BasicLayoutProps } from '@/src/components/basic-grid-layout/BasicGridLayout'
+import BasicGridLayout, { BasicGridLayoutProps, BasicGridLayoutSaveEvent } from '@/src/components/basic-grid-layout/BasicGridLayout'
 
 import { useState } from 'react';
 
@@ -26,7 +26,7 @@ function Test() {
                     xs: { x: 0, y: 0, w: 1, h: 1, static: false },
                     xxs: { x: 0, y: 0, w: 1, h: 1, static: false },
                 },
-                innerJSX: (<div style={{ width: '100%', height: '100%', backgroundColor: '#44ff4455' }}>innerJSX_0</div>)
+                innerJSX: (<div>innerJSX_0</div>)
             },
             {
                 id: 'test_1',
@@ -38,7 +38,7 @@ function Test() {
                     xs: { x: 0, y: 0, w: 2, h: 1, static: false },
                     xxs: { x: 0, y: 0, w: 2, h: 1, static: false },
                 },
-                innerJSX: (<div style={{ width: '100%', height: '100%', backgroundColor: '#ff444455' }}>innerJSX_1</div>)
+                innerJSX: (<div>innerJSX_1</div>)
             },
             {
                 id: 'test_2',
@@ -50,7 +50,7 @@ function Test() {
                     xs: { x: 0, y: 0, w: 3, h: 1, static: false },
                     xxs: { x: 0, y: 0, w: 3, h: 1, static: false },
                 },
-                innerJSX: (<div style={{ width: '100%', height: '100%', backgroundColor: '#4444ff55' }}>innerJSX_2</div>)
+                innerJSX: (<div>innerJSX_2</div>)
             },
             {
                 id: 'test_3',
@@ -62,11 +62,11 @@ function Test() {
                     xs: { x: 0, y: 0, w: 3, h: 1, static: false },
                     xxs: { x: 0, y: 0, w: 3, h: 1, static: false },
                 },
-                innerJSX: (<div style={{ width: '100%', height: '100%', backgroundColor: '#44aaff55' }}>innerJSX_3</div>)
+                innerJSX: (<div>innerJSX_3</div>)
             }
         ],
         option: {
-            className: 'test',
+            className: 'custom-basic-grid-layout',
             breakpoints: {
                 lg: 1200,
                 md: 996,
@@ -109,9 +109,19 @@ function Test() {
     });
 
     return (
-        <div style={{ width: '100%', height: '100%', backgroundColor: '#ffffffff' }}>
-            <BasicGridLayout layouts={state.layouts} option={state.option} onSave={props.onSave} />
-        </div>
+        // <div className={'custom-basic-grid-layout'}>
+        //     <BasicGridLayout
+        //         layouts={state.layouts}
+        //         option={state.option}
+        //         onSave={props.onSave}
+        //     />
+        // </div>
+
+        <BasicGridLayout
+            layouts={state.layouts}
+            option={state.option}
+            onSave={props.onSave}
+        />
     )
 }
 

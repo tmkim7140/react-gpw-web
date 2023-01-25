@@ -21,12 +21,10 @@ interface BasicGridLayoutUIProps {
 
 function BasicGridLayoutUI(props: BasicGridLayoutUIProps) {
     return (
-        <div className={'basic-grid-layout-container'}
-            style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+        <div className={'basic-grid-layout'}>
             {
                 props.basicGridLayoutToolbar != null ? (
-                    <div className={'basic-grid-layout-toolbar-area'}
-                        style={{ flex: 1, backgroundColor: '#faa4' }}>
+                    <div className={'toolbar-area'}>
                         <BasicGridLayoutToolbar
                             currScreenWidthPixel={props.basicGridLayoutToolbar.currScreenWidthPixel}
                             onClickAddBtn={props.basicGridLayoutToolbar.onClickAddBtn}
@@ -37,9 +35,7 @@ function BasicGridLayoutUI(props: BasicGridLayoutUIProps) {
                     </div>
                 ) : ('')
             }
-            <div className={'basic-grid-layout-content-area'}
-                style={{ flex: 8, backgroundColor: '#aaf4' }}>
-
+            <div className={'content-area'}>
                 <ResponsiveGridLayout
                     className={props.responsiveGridLayout.className}
                     layouts={props.responsiveGridLayout.layouts}
@@ -65,12 +61,14 @@ function BasicGridLayoutUI(props: BasicGridLayoutUIProps) {
                                 return (
                                     <div key={layout.id}>
                                         <BasicLayout
+                                            key={layout.id}
                                             id={layout.id}
                                             name={layout.name}
                                             geometry={layout.geometry}
                                             innerJSX={layout.innerJSX}
                                             titleBar={layout.titleBar}
                                             isSelected={layout.isSelected}
+                                            isStatic={layout.isStatic}
                                             hasMouseMoveArea={layout.hasMouseMoveArea}
                                             onChangeTitle={layout.onChangeTitle}
                                             onChangeCheck={layout.onChangeCheck}

@@ -38,6 +38,7 @@ function useBasicLayout(props: BasicLayoutProps) {
 
     const hasTitleBar: boolean = props.titleBar != null ? true : false;
     const isSelected: boolean = props.isSelected != null ? props.isSelected : false;
+    const isStatic: boolean = props.isStatic != null ? props.isStatic : false;
 
     const handleChangeTitle = (e: any) => {
         setState((state) => ({ title: e.target.value }))
@@ -87,7 +88,7 @@ function useBasicLayout(props: BasicLayoutProps) {
         }
     }
 
-    return { title, hasTitleBar, isSelected, handleChangeTitle, handleChangeCheck, handleClickRemoveButton, handleClickStaticButton }
+    return { title, hasTitleBar, isSelected, isStatic, handleChangeTitle, handleChangeCheck, handleClickRemoveButton, handleClickStaticButton }
 }
 
 export default useBasicLayout;
