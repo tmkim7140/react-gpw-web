@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Layout } from 'react-grid-layout';
+import { Layout, Layouts } from 'react-grid-layout';
 import { BasicLayoutEvent, BasicLayoutProps, BasicLayoutTitleBarProps } from './useBasicLayout'
 
 type ResizeHandle = 's' | 'w' | 'e' | 'n' | 'sw' | 'nw' | 'se' | 'ne';
@@ -34,30 +34,64 @@ interface BasicGridLayoutOptionProps {
     resizeHandles?: ResizeHandle[] | undefined;
     titleBar?: BasicLayoutTitleBarProps,
     hasToolbar?: boolean,
+    hasMouseMoveArea?: boolean,
+}
+
+interface BasicGridLayoutSaveEvent {
+    type: string,
+    layouts: BasicLayoutProps[],
+    option?: BasicGridLayoutOptionProps,
 }
 
 interface BasicGridLayoutProps {
     layouts: BasicLayoutProps[];
     option?: BasicGridLayoutOptionProps;
-    setLayouts: (layouts: BasicLayoutProps[]) => void;
-    setOption?: (option: BasicGridLayoutOptionProps) => void;
+    onSave: (e: BasicGridLayoutSaveEvent) => void;
 }
 
 function useBasicGridLayout(props: BasicGridLayoutProps) {
-    let layouts = _.cloneDeep(props.layouts);
-    let option = _.cloneDeep(props.option);
-
     const [state, setState] = useState({
-        responsiveLayouts: {},
+        layouts: _.cloneDeep(props.layouts),
+        option: _.cloneDeep(props.option),
         currBreakPoint: '',
+        selectedLayout: {},
     });
 
-    const setResponsiveLayouts = (newResponsiveLayouts: { [P: string]: Layout[] }) => {
+    const layoutsToResponsiveLayouts = (layouts: BasicLayoutProps[]): Layouts => {
+        let responsiveLayouts: Layouts = {};
+        if (state.option?.breakpoints != null) {
+            Object.keys(state.option.breakpoints).forEach((key: string) => {
+                responsiveLayouts[key] = layouts.map((layout: BasicLayoutProps) => (
+                    Object.assign(layout.geometry[key], {
+                        i: layout.id,
+                        minW: state.option?.layoutOption?.minW == null ? undefined : state.option?.layoutOption?.minW,
+                        maxW: state.option?.layoutOption?.maxW == null ? undefined : state.option?.layoutOption?.maxW,
+                        minH: state.option?.layoutOption?.minH == null ? undefined : state.option?.layoutOption?.minH,
+                        maxH: state.option?.layoutOption?.maxH == null ? undefined : state.option?.layoutOption?.maxH,
+                        static: state.option?.layoutOption?.static != null ? state.option?.layoutOption?.static : layout.isStatic != null && layout.isStatic
+                    })
+                ));
+            });
+        }
+
+        return responsiveLayouts;
+    }
+
+    let responsiveLayouts: Layouts = layoutsToResponsiveLayouts(state.layouts);
+
+    const setLayouts = ((layouts: BasicLayoutProps[]) => {
         setState((state) => ({
             ...state,
-            responsiveLayouts: newResponsiveLayouts
+            layouts: layouts
         }));
-    };
+    });
+
+    const setOption = ((option: BasicGridLayoutOptionProps) => {
+        setState((state) => ({
+            ...state,
+            option: option
+        }));
+    });
 
     const setCurrBreakpoint = ((breakpoint: string) => {
         setState((state) => ({
@@ -67,24 +101,9 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
     });
 
     let initLayoutList = (() => {
-        // init responsiveLayouts
-        if (option?.breakpoints != null) {
-            let responsiveLayouts: { [P: string]: Layout[] } = {};
-            Object.keys(option.breakpoints).forEach((key: string) => {
-                responsiveLayouts[key] = layouts.map((layout: BasicLayoutProps) => (
-                    Object.assign(layout.geometry[key], {
-                        i: layout.id,
-                        minW: option?.layoutOption?.minW == null ? undefined : option?.layoutOption?.minW,
-                        maxW: option?.layoutOption?.maxW == null ? undefined : option?.layoutOption?.maxW,
-                        minH: option?.layoutOption?.minH == null ? undefined : option?.layoutOption?.minH,
-                        maxH: option?.layoutOption?.maxH == null ? undefined : option?.layoutOption?.maxH,
-                    })
-                ));
-            });
-            setResponsiveLayouts(responsiveLayouts);
-
+        if (state.option?.breakpoints != null) {
             // init currBreakpoint
-            let breakpointsList = Object.keys(option.breakpoints).map((key: string) => ({ key: key, value: option?.breakpoints == null ? 0 : option.breakpoints[key] }));
+            let breakpointsList = Object.keys(state.option.breakpoints).map((key: string) => ({ key: key, value: state.option?.breakpoints == null ? 0 : state.option.breakpoints[key] }));
             // ASC 정렬
             breakpointsList.sort((a: { key: string, value: number }, b: { key: string, value: number }) => b.value - a.value)
             var browserSize = {
@@ -100,8 +119,26 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
         }
     });
 
-    const handleLayoutChange = (layout: any, layouts: any) => {
-        setResponsiveLayouts(layouts);
+    const handleLayoutChange = (currLayouts: Layout[], allLayouts: Layouts) => {
+        if (props.option?.breakpoints == null) return;
+        if (state.currBreakPoint === '') return;
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        Object.keys(props.option?.breakpoints).forEach(key => {
+            allLayouts[key].forEach((responsiveLayout: Layout) => {
+                let layout: BasicLayoutProps | undefined = layoutsClone.find((layout: BasicLayoutProps) => layout.id === responsiveLayout.i);
+                if (layout != null) {
+                    layout.geometry[key].x = responsiveLayout.x;
+                    layout.geometry[key].y = responsiveLayout.y;
+                    layout.geometry[key].w = responsiveLayout.w;
+                    layout.geometry[key].h = responsiveLayout.h;
+                    layout.geometry[key].moved = responsiveLayout.moved;
+                    layout.geometry[key].static = responsiveLayout.static;
+                }
+            })
+        })
+
+        setLayouts(layoutsClone);
     };
 
     const handleBreakPointChange = (breakpoint: string) => {
@@ -110,8 +147,33 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
 
     const handleClickAddBtn = (e: any) => {
         console.log('BasicGridLayout.handleClickAddBtn');
-        console.log(state.responsiveLayouts);
-        console.log(layouts);
+        let id = uuidv4();
+        let addPosition = getLayoutAddPosition(responsiveLayouts, props.option?.breakpoints)
+
+        let newLayout: BasicLayoutProps = {
+            id: id,
+            name: 'newLayout',
+            geometry: {
+                lg: { x: 0, y: 0, w: 1, h: 1, static: false },
+                md: { x: 0, y: 0, w: 1, h: 1, static: false },
+                sm: { x: 0, y: 0, w: 1, h: 1, static: false },
+                xs: { x: 0, y: 0, w: 1, h: 1, static: false },
+                xxs: { x: 0, y: 0, w: 1, h: 1, static: false },
+            },
+            innerJSX: (<div style={{ width: '100%', height: '100%', backgroundColor: '#44ff4455' }}>{id}</div>)
+        }
+        if (props.option?.breakpoints != null) {
+            Object.keys(props.option.breakpoints).forEach(key => {
+                newLayout.geometry[key].x = addPosition[key].x;
+                newLayout.geometry[key].y = addPosition[key].y;
+            })
+        }
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+
+        layoutsClone.push(newLayout)
+
+        setLayouts(layoutsClone);
     }
 
     const handleClickModifyBtn = (e: any) => {
@@ -119,24 +181,136 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
     }
 
     const handleClickRemoveBtn = (e: any) => {
-        console.log('BasicGridLayout.handleClickRemoveBtn');
+        console.log('BasicGridLayout.handleClickRemoveBtn',);
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === (state.selectedLayout as BasicLayoutProps).id);
+
+        if (idx < 0) {
+            alert("!! error - 선택된 레이아웃이 없습니다 !!");
+            return;
+        }
+
+        layoutsClone.splice(idx, 1);
+
+        setLayouts(layoutsClone)
+
     }
+
     const handleClickSaveBtn = (e: any) => {
         console.log('BasicGridLayout.handleClickSaveBtn');
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        let optionClone: BasicGridLayoutOptionProps = _.cloneDeep(state.option);
+
+        console.log(props.layouts)
+        layoutsClone.forEach((layout: BasicLayoutProps) => {
+            delete layout.onChangeCheck;
+            delete layout.onChangeTitle;
+            delete layout.onClickRemoveBtn;
+            delete layout.onClickStaticBtn;
+            delete layout.isSelected;
+            delete layout.isTemporary;
+        });
+        console.log(layoutsClone)
+
+        if (props.onSave != null) {
+            let e: BasicGridLayoutSaveEvent = {
+                type: 'save',
+                layouts: layoutsClone,
+                option: optionClone,
+            }
+            props.onSave(e);
+        }
+    }
+
+    const handleChangeTitleFromLayout = (e: BasicLayoutEvent) => {
+        if (e.htmlEvent.target == null) return;
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+
+        let value = (e.htmlEvent.target as HTMLInputElement).value;
+
+        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
+        if (idx > -1) {
+            if (layoutsClone[idx].titleBar == null) layoutsClone[idx].titleBar = { title: value };
+            else layoutsClone[idx].titleBar!.title = value;
+        }
+
+        setLayouts(layoutsClone);
     }
 
     const handleChangeCheckFromLayout = (e: BasicLayoutEvent) => {
-        console.log(e);
+        if (e.htmlEvent.target == null) return;
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+
+        let checked = (e.htmlEvent.target as HTMLInputElement).checked;
+
+        let beforeIdx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === (state.selectedLayout as BasicLayoutProps).id);
+        if (beforeIdx > -1) layoutsClone[beforeIdx].isSelected = false;
+
+        let currIdx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
+        if (currIdx > -1) layoutsClone[currIdx].isSelected = checked;
+
+        setState((state) => ({
+            ...state,
+            layouts: layoutsClone,
+            selectedLayout: layoutsClone[currIdx]
+        }));
     }
 
     const handleClickRemoveBtnFromLayout = (e: BasicLayoutEvent) => {
-        console.log(e);
+        console.log("handleClickRemoveBtnFromLayout : ", e);
+        if (e.layout == null || e.layout.id == null) return;
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
+
+        layoutsClone.splice(idx, 1);
+
+        setLayouts(layoutsClone)
     }
 
     const handleClickStaticBtnFromLayout = (e: BasicLayoutEvent) => {
-        console.log(e);
+        console.log("handleClickStaticBtnFromLayout : ", e);
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
+
+        layoutsClone[idx].isStatic = layoutsClone[idx].isStatic == null ? true : !(layoutsClone[idx].isStatic);
+
+        setLayouts(layoutsClone)
     }
 
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    const getLayoutAddPosition = (responsiveLayouts: Layouts, breakpoints: { [P: string]: number } | undefined) => {
+        if (breakpoints == null) return {};
+        let addPosition: { [P: string]: { x: number, y: number } } = {};
+        Object.keys(breakpoints).forEach(key => {
+            let y = 0;
+            let h = 0;
+            let countH = 0;
+            responsiveLayouts[key].forEach((layout: Layout, idx: number) => {
+                if (layout.x === 0) {
+                    countH = countH + layout.h;
+                    if (y < layout.y) {
+                        y = layout.y;
+                        h = layout.h;
+                    }
+                }
+            });
+            let positionY = y + h - 1;
+            if (positionY < 0) positionY = countH;
+            addPosition[key] = { x: 0, y: positionY };
+        });
+
+        return addPosition;
+    }
     ///
 
     useEffect(() => {
@@ -144,10 +318,10 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
     }, []);
 
     return {
-        state,
+        state, responsiveLayouts,
         handleLayoutChange, handleBreakPointChange,
         handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn,
-        handleChangeCheckFromLayout, handleClickRemoveBtnFromLayout, handleClickStaticBtnFromLayout
+        handleChangeTitleFromLayout, handleChangeCheckFromLayout, handleClickRemoveBtnFromLayout, handleClickStaticBtnFromLayout
     };
 }
 
@@ -156,5 +330,6 @@ export default useBasicGridLayout;
 export type {
     ResizeHandle,
     BasicGridLayoutOptionProps,
+    BasicGridLayoutSaveEvent,
     BasicGridLayoutProps
 }

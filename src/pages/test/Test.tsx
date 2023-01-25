@@ -1,8 +1,18 @@
-import BasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps, BasicLayoutProps } from '@/src/components/basic-grid-layout/BasicGridLayout'
+import BasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps, BasicGridLayoutSaveEvent, BasicLayoutProps } from '@/src/components/basic-grid-layout/BasicGridLayout'
 
 import { useState } from 'react';
 
 function Test() {
+
+    const handleSaveBasicGridLayout = (e: BasicGridLayoutSaveEvent) => {
+        if (confirm('저장하시겠습니까?')) { //eslint-disable-line
+            setState((state) => ({
+                ...state,
+                layouts: e.layouts,
+                option: e.option
+            }));
+        }
+    }
 
     const props: BasicGridLayoutProps = {
         layouts: [
@@ -64,7 +74,7 @@ function Test() {
                 xs: 480,
                 xxs: 300,
             },
-            cols: { lg: 8, md: 6, sm: 4, xs: 3, xxs: 2 },
+            cols: { lg: 12, md: 6, sm: 4, xs: 3, xxs: 2 },
             rowHeight: 120,
             maxRows: 12,
             width: 1200,
@@ -88,9 +98,9 @@ function Test() {
                 hasStaticBtn: true,
             },
             hasToolbar: true,
+            hasMouseMoveArea: true,
         },
-        setLayouts: (layouts: BasicLayoutProps[]) => { },
-        setOption: (option: BasicGridLayoutOptionProps) => { }
+        onSave: handleSaveBasicGridLayout,
     };
 
     const [state, setState] = useState({
@@ -98,24 +108,9 @@ function Test() {
         option: props.option,
     });
 
-    props.setLayouts = (layouts: BasicLayoutProps[]) => {
-        setState((state) => ({
-            ...state,
-            layouts: layouts
-        }));
-    };
-
-    props.setOption = (option: BasicGridLayoutOptionProps) => {
-        setState((state) => ({
-            ...state,
-            option: option
-        }));
-    };
-
     return (
-        <div style={{ minHeight: '100vh', width: '100%', height: '100%', backgroundColor: '#ffffffff' }}>
-            <BasicGridLayout layouts={state.layouts} option={state.option}
-                setLayouts={props.setLayouts} setOption={props.setOption} />
+        <div style={{ width: '100%', height: '100%', backgroundColor: '#ffffffff' }}>
+            <BasicGridLayout layouts={state.layouts} option={state.option} onSave={props.onSave} />
         </div>
     )
 }

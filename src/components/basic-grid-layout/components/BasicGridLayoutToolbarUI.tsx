@@ -22,10 +22,6 @@ function BasicGridLayoutToolbarUI(props: BasicGridLayoutToolbarUIProps) {
                 추가
             </Button>
             <Button type='text' style={{ backgroundColor: '#44ffaaaa' }}
-                onClick={props.ontClickModifyBtn}>
-                수정
-            </Button>
-            <Button type='text' style={{ backgroundColor: '#44ffaaaa' }}
                 onClick={props.onClickRemoveBtn}>
                 삭제
             </Button>

@@ -1,4 +1,4 @@
-import useBasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps } from './hooks/useBasicGridLayout';
+import useBasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps, BasicGridLayoutSaveEvent } from './hooks/useBasicGridLayout';
 
 import { BasicLayoutEvent, BasicLayoutProps, BasicLayoutTitleBarProps } from './hooks/useBasicLayout';
 import { BasicGridLayoutToolbarProps } from './hooks/useBasicGridLayoutToolbar';
@@ -6,16 +6,16 @@ import BasicGridLayoutUI, { BasicGridLayoutUIProps } from './components/BasicGri
 
 function BasicGridLayout(props: BasicGridLayoutProps) {
     const {
-        state,
+        state, responsiveLayouts,
         handleLayoutChange, handleBreakPointChange,
         handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn,
-        handleChangeCheckFromLayout, handleClickRemoveBtnFromLayout, handleClickStaticBtnFromLayout
+        handleChangeTitleFromLayout, handleChangeCheckFromLayout, handleClickRemoveBtnFromLayout, handleClickStaticBtnFromLayout
     } = useBasicGridLayout(props);
 
     const bglUIProps: BasicGridLayoutUIProps = {
         responsiveGridLayout: {
             className: props.option?.className,
-            layouts: state.responsiveLayouts,
+            layouts: responsiveLayouts,
             breakpoints: props.option?.breakpoints,
             cols: props.option?.cols,
             rowHeight: props.option?.rowHeight,
@@ -39,20 +39,26 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
             onClickRemoveBtn: handleClickRemoveBtn,
             onClickSaveBtn: handleClickSaveBtn,
         } : undefined,
-        basicLayouts: props.layouts.map(layout => ({
-            id: layout.id,
-            name: layout.name,
-            geometry: layout.geometry,
-            innerJSX: layout.innerJSX,
-            titleBar: props.option?.titleBar,
-            onChangeCheck: handleChangeCheckFromLayout,
-            onClickRemoveBtn: handleClickRemoveBtnFromLayout,
-            onClickStaticBtn: handleClickStaticBtnFromLayout,
-        })),
+        basicLayouts: state.layouts.map((layout: BasicLayoutProps) => {
+            let layoutProps: BasicLayoutProps = {
+                id: layout.id,
+                name: layout.name,
+                geometry: layout.geometry,
+                innerJSX: layout.innerJSX,
+                titleBar: props.option?.titleBar,
+                isSelected: layout.isSelected,
+                hasMouseMoveArea: props.option?.hasMouseMoveArea,
+                onChangeTitle: handleChangeTitleFromLayout,
+                onChangeCheck: handleChangeCheckFromLayout,
+                onClickRemoveBtn: handleClickRemoveBtnFromLayout,
+                onClickStaticBtn: handleClickStaticBtnFromLayout,
+            };
+            return layoutProps;
+        }),
     }
 
     return (
-        <div>
+        <div style={{ width: '100%', height: '100%' }}>
             <BasicGridLayoutUI
                 responsiveGridLayout={bglUIProps.responsiveGridLayout}
                 basicGridLayoutToolbar={bglUIProps.basicGridLayoutToolbar}
@@ -66,6 +72,7 @@ export default BasicGridLayout;
 
 export type {
     BasicGridLayoutOptionProps,
+    BasicGridLayoutSaveEvent,
     BasicGridLayoutProps,
 
     BasicLayoutTitleBarProps,

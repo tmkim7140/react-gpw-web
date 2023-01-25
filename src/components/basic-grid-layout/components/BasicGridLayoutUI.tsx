@@ -70,6 +70,9 @@ function BasicGridLayoutUI(props: BasicGridLayoutUIProps) {
                                             geometry={layout.geometry}
                                             innerJSX={layout.innerJSX}
                                             titleBar={layout.titleBar}
+                                            isSelected={layout.isSelected}
+                                            hasMouseMoveArea={layout.hasMouseMoveArea}
+                                            onChangeTitle={layout.onChangeTitle}
                                             onChangeCheck={layout.onChangeCheck}
                                             onClickRemoveBtn={layout.onClickRemoveBtn}
                                             onClickStaticBtn={layout.onClickStaticBtn} />
