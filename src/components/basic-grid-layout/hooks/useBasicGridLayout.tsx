@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Layout, Layouts } from 'react-grid-layout';
+import { BasicGridLayoutToolbarEvent } from './useBasicGridLayoutToolbar';
 import { BasicLayoutEvent, BasicLayoutProps, BasicLayoutTitleBarProps } from './useBasicLayout'
 
 type ResizeHandle = 's' | 'w' | 'e' | 'n' | 'sw' | 'nw' | 'se' | 'ne';
@@ -61,16 +62,25 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
         let responsiveLayouts: Layouts = {};
         if (state.option?.breakpoints != null) {
             Object.keys(state.option.breakpoints).forEach((key: string) => {
-                responsiveLayouts[key] = layouts.map((layout: BasicLayoutProps) => (
-                    Object.assign(layout.geometry[key], {
+                responsiveLayouts[key] = layouts.map((layout: BasicLayoutProps) => {
+                    let w = layout.geometry[key].w;
+                    if (state.option?.layoutOption?.minW != null && state.option?.layoutOption?.minW > w) w = state.option?.layoutOption?.minW;
+                    if (state.option?.layoutOption?.maxW != null && state.option?.layoutOption?.maxW < w) w = state.option?.layoutOption?.maxW;
+
+                    let h = layout.geometry[key].h;
+                    if (state.option?.layoutOption?.minH != null && state.option?.layoutOption?.minH > h) h = state.option?.layoutOption?.minH;
+                    if (state.option?.layoutOption?.maxH != null && state.option?.layoutOption?.maxH < h) h = state.option?.layoutOption?.maxH;
+                    return Object.assign(layout.geometry[key], {
                         i: layout.id,
+                        w: w,
+                        h: h,
                         minW: state.option?.layoutOption?.minW == null ? undefined : state.option?.layoutOption?.minW,
                         maxW: state.option?.layoutOption?.maxW == null ? undefined : state.option?.layoutOption?.maxW,
                         minH: state.option?.layoutOption?.minH == null ? undefined : state.option?.layoutOption?.minH,
                         maxH: state.option?.layoutOption?.maxH == null ? undefined : state.option?.layoutOption?.maxH,
                         static: state.option?.layoutOption?.static != null ? state.option?.layoutOption?.static : layout.isStatic != null && layout.isStatic
                     })
-                ));
+                });
             });
         }
 
@@ -222,6 +232,32 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
         }
     }
 
+    const handleClickSortBtn = (e: BasicGridLayoutToolbarEvent) => {
+        console.log("handleClickSortBtn : ", e);
+
+        let colSize = state.option.cols[state.currBreakPoint];
+        let col = e.data.sortItem.col;
+        // let row = e.data.sortItem.row;
+        let width = colSize / col;
+        let height = state.option.layoutOption.minH;
+        let x = 0;
+        let y = 0;
+
+        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        layoutsClone.forEach((layout: BasicLayoutProps) => {
+            layout.geometry[state.currBreakPoint].x = x;
+            layout.geometry[state.currBreakPoint].y = y;
+            layout.geometry[state.currBreakPoint].w = width;
+            layout.geometry[state.currBreakPoint].h = height;
+            x += width;
+            if (x == colSize) {
+                x = 0;
+                y += height;
+            }
+        });
+        setLayouts(layoutsClone);
+    }
+
     const handleChangeTitleFromLayout = (e: BasicLayoutEvent) => {
         if (e.htmlEvent.target == null) return;
         let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
@@ -318,7 +354,7 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
     return {
         state, responsiveLayouts,
         handleLayoutChange, handleBreakPointChange,
-        handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn,
+        handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn, handleClickSortBtn,
         handleChangeTitleFromLayout, handleChangeCheckFromLayout, handleClickRemoveBtnFromLayout, handleClickStaticBtnFromLayout
     };
 }

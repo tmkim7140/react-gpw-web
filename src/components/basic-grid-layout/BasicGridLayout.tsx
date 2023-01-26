@@ -10,7 +10,7 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
     const {
         state, responsiveLayouts,
         handleLayoutChange, handleBreakPointChange,
-        handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn,
+        handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn, handleClickSortBtn,
         handleChangeTitleFromLayout, handleChangeCheckFromLayout, handleClickRemoveBtnFromLayout, handleClickStaticBtnFromLayout
     } = useBasicGridLayout(props);
 
@@ -35,11 +35,18 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
             onBreakpointChange: handleBreakPointChange,
         },
         basicGridLayoutToolbar: props.option?.hasToolbar != null && props.option?.hasToolbar ? {
+            layoutsCount: state.layouts.length,
             currScreenWidthPixel: props.option?.breakpoints?.[state.currBreakPoint],
+            currColSize: props.option?.cols?.[state.currBreakPoint],
+            minWidthSize: props.option?.layoutOption?.minW,
+            maxWidthSize: props.option?.layoutOption?.maxW,
+            minHeightSize: props.option?.layoutOption?.minH,
+            maxHeightSize: props.option?.layoutOption?.maxH,
             onClickAddBtn: handleClickAddBtn,
             ontClickModifyBtn: handleClickModifyBtn,
             onClickRemoveBtn: handleClickRemoveBtn,
             onClickSaveBtn: handleClickSaveBtn,
+            onClickSortBtn: handleClickSortBtn,
         } : undefined,
         basicLayouts: state.layouts.map((layout: BasicLayoutProps) => {
             let layoutProps: BasicLayoutProps = {

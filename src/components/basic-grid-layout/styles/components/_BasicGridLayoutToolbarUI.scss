@@ -1,0 +1,124 @@
+.basic-grid-layout-toolbar {
+    position: fixed;
+    top: 25px;
+    left: auto;
+    align-items: center;
+    justify-content: space-between;
+    display: flex;
+    z-index: 100;
+    width: auto;
+    height: 50px;
+    border: 1px solid;
+    border-radius: 0.3rem;
+    background-color: #beff;
+
+    .toggle-btn {
+        width: 20px;
+        height: 100%;
+        cursor: pointer;
+        border: 1px solid;
+        border-radius: 0.3rem;
+        background-color: #ffaf;
+        background-size: 20px 30px;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .toggle-btn:hover {
+        background-color: #eeaf;
+    }
+
+    .toggle-btn:active {
+        background-color: #ffaf;
+    }
+
+    .toggle-on-icon {
+        background-image: url("../../assets/icons/arrow-right.png");
+    }
+
+    .toggle-off-icon {
+        background-image: url("../../assets/icons/arrow-left.png");
+    }
+
+    .tool-container {
+        display: flex;
+        align-items: center;
+        width: auto;
+        height: 100%;
+
+
+        .tool-divide {
+            width: 1px;
+            height: 100%;
+            border: 1px solid #7aaf;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            width: auto;
+            height: 90%;
+
+            .tool {
+                margin-left: 2px;
+                margin-right: 2px;
+            }
+
+            .tool-info {
+                font-weight: 500;
+                font-size: 12px;
+                text-align: center;
+                width: 100px;
+                height: 90%;
+                border: 1px solid;
+                border-radius: 0.3rem;
+                background-color: #ffef;
+
+                .tool-info-label {
+                    border-bottom: 1px solid;
+                    border-radius: 0.3rem 0.3rem 0 0;
+                    background-color: #dfef;
+                }
+
+                .tool-info-value {
+                    border-radius: 0 0 0.3rem 0.3rem;
+                    background-color: #ffef;
+                }
+            }
+
+            .tool-btn {
+                width: 50px;
+                height: 90%;
+                cursor: pointer;
+                border: 1px solid;
+                border-radius: 0.3rem;
+                background-color: #aeaf;
+                font-weight: 600;
+            }
+
+            .tool-label {
+                font-weight: 600;
+            }
+
+            .tool-select {
+                width: 100px;
+                height: 70%;
+                border: 1px solid;
+                border-radius: 0.3rem;
+                text-align: center;
+
+                .tool-select-option {
+                    text-align: center;
+                }
+            }
+
+            .tool-btn:hover {
+                background-color: #acaf;
+            }
+
+            .tool-btn:active {
+                background-color: #aeaf;
+            }
+        }
+    }
+}

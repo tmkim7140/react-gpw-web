@@ -15,9 +15,10 @@
         justify-content: space-between;
         width: 100%;
         height: 20px;
-        background-color: #dddf;
+        background-color: #fddf;
 
         .title-container {
+            flex: 3;
             display: flex;
 
             .checkbox-input {}
@@ -28,6 +29,7 @@
         }
 
         .tool-container {
+            flex: 2;
             display: flex;
             justify-content: flex-end;
 

@@ -24,15 +24,20 @@ function BasicGridLayoutUI(props: BasicGridLayoutUIProps) {
         <div className={'basic-grid-layout'}>
             {
                 props.basicGridLayoutToolbar != null ? (
-                    <div className={'toolbar-area'}>
-                        <BasicGridLayoutToolbar
-                            currScreenWidthPixel={props.basicGridLayoutToolbar.currScreenWidthPixel}
-                            onClickAddBtn={props.basicGridLayoutToolbar.onClickAddBtn}
-                            ontClickModifyBtn={props.basicGridLayoutToolbar.ontClickModifyBtn}
-                            onClickRemoveBtn={props.basicGridLayoutToolbar.onClickRemoveBtn}
-                            onClickSaveBtn={props.basicGridLayoutToolbar.onClickSaveBtn}
-                        />
-                    </div>
+                    <BasicGridLayoutToolbar
+                        layoutsCount={props.basicGridLayoutToolbar.layoutsCount}
+                        currScreenWidthPixel={props.basicGridLayoutToolbar.currScreenWidthPixel}
+                        currColSize={props.basicGridLayoutToolbar.currColSize}
+                        minWidthSize={props.basicGridLayoutToolbar.minWidthSize}
+                        maxWidthSize={props.basicGridLayoutToolbar.maxWidthSize}
+                        minHeightSize={props.basicGridLayoutToolbar.minHeightSize}
+                        maxHeightSize={props.basicGridLayoutToolbar.maxHeightSize}
+                        onClickAddBtn={props.basicGridLayoutToolbar.onClickAddBtn}
+                        ontClickModifyBtn={props.basicGridLayoutToolbar.ontClickModifyBtn}
+                        onClickRemoveBtn={props.basicGridLayoutToolbar.onClickRemoveBtn}
+                        onClickSaveBtn={props.basicGridLayoutToolbar.onClickSaveBtn}
+                        onClickSortBtn={props.basicGridLayoutToolbar.onClickSortBtn}
+                    />
                 ) : ('')
             }
             <div className={'content-area'}>
