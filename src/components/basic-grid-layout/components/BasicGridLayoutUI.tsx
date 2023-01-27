@@ -21,7 +21,7 @@ interface BasicGridLayoutUIProps {
 
 function BasicGridLayoutUI(props: BasicGridLayoutUIProps) {
     return (
-        <div className={'basic-grid-layout'}>
+        <div className={props.responsiveGridLayout.className != null ? props.responsiveGridLayout.className : 'basic-grid-layout'}>
             {
                 props.basicGridLayoutToolbar != null ? (
                     <BasicGridLayoutToolbar

@@ -1,11 +1,13 @@
 import useBasicLayout, { BasicLayoutProps } from './hooks/useBasicLayout';
-import BasicLayoutUI from './components/BasicLayoutUI';
+// import BasicLayoutUI from './components/BasicLayoutUI';
+import BasicLayoutUIByAntd from './components/BasicLayoutUIByAntd';
 
 function BasicLayout(props: BasicLayoutProps) {
     const { title, hasTitleBar, isSelected, isStatic, handleChangeTitle, handleChangeCheck, handleClickRemoveButton, handleClickStaticButton } = useBasicLayout(props);
 
     return (
-        <BasicLayoutUI
+        <BasicLayoutUIByAntd
+            // <BasicLayoutUI
             innerJSX={props.innerJSX}
             title={title}
             hasTitleBar={hasTitleBar}

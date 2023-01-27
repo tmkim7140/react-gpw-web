@@ -1,0 +1,52 @@
+.basic-layout {
+    width: 100%;
+    height: 100%;
+    background-color: #feeebbff;
+    display: flex;
+    flex-direction: column;
+    border: 0;
+    cursor: move;
+
+
+    .cursor-move {
+        cursor: move;
+    }
+
+    .bl-header {
+        width: 100%;
+        height: 100%;
+        // background-color: #fddf;
+
+        .title-container {
+
+            .checkbox-input {}
+
+            .title-input {}
+        }
+
+        .tool-container {
+            display: flex;
+            justify-content: flex-end;
+
+            .tool-btn {
+                width: 30px;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+            }
+        }
+    }
+
+    .bl-body {
+        width: 100%;
+        height: 100%;
+        background-color: #9e9f;
+    }
+
+    .mouse-move-area {
+        position: absolute;
+        right: -10px;
+        bottom: -5px;
+        color: #0008;
+    }
+}

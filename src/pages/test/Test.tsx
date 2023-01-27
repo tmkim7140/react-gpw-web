@@ -82,7 +82,7 @@ function Test() {
                 margin: [10, 10],
                 minW: 2,
                 maxW: 12,
-                minH: 1,
+                minH: 2,
                 maxH: 6,
             },
             isDraggable: true,
@@ -108,14 +108,6 @@ function Test() {
     });
 
     return (
-        // <div className={'custom-basic-grid-layout'}>
-        //     <BasicGridLayout
-        //         layouts={state.layouts}
-        //         option={state.option}
-        //         onSave={props.onSave}
-        //     />
-        // </div>
-
         <BasicGridLayout
             layouts={state.layouts}
             option={state.option}

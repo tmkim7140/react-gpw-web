@@ -1,6 +1,10 @@
-@import './components/BasicGridLayoutUI';
-@import './components/BasicGridLayoutToolbarUI';
-@import './components/BasicLayoutUI';
+// @import './components/BasicGridLayoutUI';
+// @import './components/BasicGridLayoutToolbarUI';
+// @import './components/BasicLayoutUI';
+
+@import './components/BasicGridLayoutUIByAntd';
+@import './components/BasicGridLayoutToolbarUIByAntd';
+@import './components/BasicLayoutUIByAntd';
 
 .default-basic-grid-layout {
     width: 100%;

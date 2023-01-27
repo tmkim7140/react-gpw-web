@@ -1,12 +1,14 @@
 import useBasicGridLayoutToolbar, { BasicGridLayoutToolbarProps } from './hooks/useBasicGridLayoutToolbar';
-import BasicGridLayoutToolbarUI from './components/BasicGridLayoutToolbarUI'
+// import BasicGridLayoutToolbarUI from './components/BasicGridLayoutToolbarUI'
+import BasicGridLayoutToolbarUIByAntd from './components/BasicGridLayoutToolbarUIByAntd'
 
 function BasicGridLayoutToolbar(props: BasicGridLayoutToolbarProps) {
     const { toggleFlag, currScreenWidthPixel, currColSize, minWidthSize, maxWidthSize, minHeightSize, maxHeightSize, sortItemList,
         handleClickToogleBtn, handleClickAddBtn, handleClickModifyBtn, handleClickRemoveBtn, handleClickSaveBtn, handleInputSortItem, handleClickSortBtn } = useBasicGridLayoutToolbar(props);
 
     return (
-        <BasicGridLayoutToolbarUI
+        <BasicGridLayoutToolbarUIByAntd
+            // <BasicGridLayoutToolbarUI
             toggleFlag={toggleFlag}
             currScreenWidthPixel={currScreenWidthPixel}
             currColSize={currColSize}

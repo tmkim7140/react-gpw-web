@@ -4,7 +4,8 @@ import useBasicGridLayout, { BasicGridLayoutOptionProps, BasicGridLayoutProps, B
 
 import { BasicLayoutEvent, BasicLayoutProps, BasicLayoutTitleBarProps } from './hooks/useBasicLayout';
 import { BasicGridLayoutToolbarProps } from './hooks/useBasicGridLayoutToolbar';
-import BasicGridLayoutUI, { BasicGridLayoutUIProps } from './components/BasicGridLayoutUI';
+// import BasicGridLayoutUI, { BasicGridLayoutUIProps } from './components/BasicGridLayoutUI';
+import BasicGridLayoutUIByAntd, { BasicGridLayoutUIProps } from './components/BasicGridLayoutUIByAntd';
 
 function BasicGridLayout(props: BasicGridLayoutProps) {
     const {
@@ -68,13 +69,12 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
     }
 
     return (
-        <div className={props.option?.className != null ? props.option?.className : 'default-basic-grid-layout'}>
-            <BasicGridLayoutUI
-                responsiveGridLayout={bglUIProps.responsiveGridLayout}
-                basicGridLayoutToolbar={bglUIProps.basicGridLayoutToolbar}
-                basicLayouts={bglUIProps.basicLayouts}
-            />
-        </div>
+        <BasicGridLayoutUIByAntd
+            // <BasicGridLayoutUI
+            responsiveGridLayout={bglUIProps.responsiveGridLayout}
+            basicGridLayoutToolbar={bglUIProps.basicGridLayoutToolbar}
+            basicLayouts={bglUIProps.basicLayouts}
+        />
     );
 }
 

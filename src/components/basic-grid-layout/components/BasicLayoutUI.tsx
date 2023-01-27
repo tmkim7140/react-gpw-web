@@ -23,8 +23,8 @@ function BasicLayoutUI(props: BasicLayoutUIProps) {
         <div className={'basic-layout'}>
             {
                 props.hasTitleBar != null && props.hasTitleBar ? (
-                    <div className='bl-header cursor-move'>
-                        <div className='title-container'>
+                    <div className={'bl-header cursor-move'}>
+                        <div className={'title-container'}>
                             {
                                 props.hasCheckbox != null && props.hasCheckbox != null ? (
                                     <input className={'checkbox-input'}
@@ -70,7 +70,7 @@ function BasicLayoutUI(props: BasicLayoutUIProps) {
             </div>
             {
                 props.hasMouseMoveArea != null && props.hasMouseMoveArea ? (
-                    <div className="mouse-move-area cursor-move">
+                    <div className={'mouse-move-area cursor-move'}>
                         ●
                     </div>
                 ) : ('')
