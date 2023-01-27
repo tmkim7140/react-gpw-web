@@ -52,7 +52,7 @@ function BasicGridLayout(props: BasicGridLayoutProps) {
     }
 
     return (
-        <div>
+        <div style={{ width: '100%', height: '100%' }}>
             <BasicGridLayoutUI
                 responsiveGridLayout={bglUIProps.responsiveGridLayout}
                 basicGridLayoutToolbar={bglUIProps.basicGridLayoutToolbar}

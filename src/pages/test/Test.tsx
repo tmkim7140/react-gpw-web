@@ -113,7 +113,7 @@ function Test() {
     };
 
     return (
-        <div style={{ minHeight: '100vh', width: '100%', height: '100%', backgroundColor: '#ffffffff' }}>
+        <div style={{ width: '100%', height: '100%', backgroundColor: '#ffffffff' }}>
             <BasicGridLayout layouts={state.layouts} option={state.option}
                 setLayouts={props.setLayouts} setOption={props.setOption} />
         </div>

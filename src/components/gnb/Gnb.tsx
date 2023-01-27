@@ -12,7 +12,8 @@ const Gnb = ( props: GnbProps ) => {
     }
 
     return (
-        <div className='gnb'>
+        
+        <div className='gnb' >
             <div className='gnb-menu'>
                 <ul className='gnb-menu-list'>
                     <li> 
