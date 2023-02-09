@@ -5,14 +5,14 @@ import {
     LeftOutlined,
 } from '@ant-design/icons';
 
-interface SortItem {
+interface ISortItem {
     cd: string,
     value: string,
     row: number,
     col: number,
 }
 
-interface BasicGridLayoutToolbarUIProps {
+interface IBasicGridLayoutToolbarUIProps {
     toggleFlag?: boolean;
     currScreenWidthPixel?: number;
     currColSize?: number;
@@ -20,7 +20,7 @@ interface BasicGridLayoutToolbarUIProps {
     maxWidthSize?: number;
     minHeightSize?: number;
     maxHeightSize?: number;
-    sortItemList?: SortItem[];
+    sortItemList?: ISortItem[];
     onClickToogleBtn?: ((e: any) => void);
     onClickAddBtn?: ((e: any) => void);
     ontClickModifyBtn?: ((e: any) => void);
@@ -30,10 +30,8 @@ interface BasicGridLayoutToolbarUIProps {
     onClickSortBtn?: ((e: any) => void);
 }
 
-function BasicGridLayoutToolbarUIByAntd(props: BasicGridLayoutToolbarUIProps) {
+function BasicGridLayoutToolbar(props: IBasicGridLayoutToolbarUIProps) {
     const handleChangeSortItem = (optionValue: any) => {
-        console.log(optionValue);
-
         let event = {
             target: {
                 selectedOptions: optionValue,
@@ -148,7 +146,7 @@ function BasicGridLayoutToolbarUIByAntd(props: BasicGridLayoutToolbarUIProps) {
                                     <Select className={'tool tool-select'}
                                         onChange={handleChangeSortItem}
                                         options={
-                                            props.sortItemList.map((item: SortItem) => ({
+                                            props.sortItemList.map((item: ISortItem) => ({
                                                 label: item.value,
                                                 value: item.cd,
                                             }))
@@ -171,8 +169,8 @@ function BasicGridLayoutToolbarUIByAntd(props: BasicGridLayoutToolbarUIProps) {
     );
 }
 
-export default BasicGridLayoutToolbarUIByAntd;
+export default BasicGridLayoutToolbar;
 
 export type {
-    BasicGridLayoutToolbarUIProps,
+    IBasicGridLayoutToolbarUIProps,
 }

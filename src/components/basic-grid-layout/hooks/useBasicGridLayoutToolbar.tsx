@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-interface BasicGridLayoutToolbarProps {
+interface IBasicGridLayoutToolbarProps {
     layoutsCount: number;
     currScreenWidthPixel?: number;
     currColSize?: number;
@@ -15,20 +15,20 @@ interface BasicGridLayoutToolbarProps {
     onClickSortBtn?: ((e: any) => void);
 }
 
-interface BasicGridLayoutToolbarEvent {
+interface IBasicGridLayoutToolbarEvent {
     type: string,
     data: any,
     htmlEvent: Event,
 }
 
-interface SortItem {
+interface ISortItem {
     cd: string,
     value: string,
     col: number,
     row: number,
 }
 
-function useBasicGridLayoutToolbar(props: BasicGridLayoutToolbarProps) {
+function useBasicGridLayoutToolbar(props: IBasicGridLayoutToolbarProps) {
     const [state, setState] = useState({
         toggleFlag: true,
         sortItemList: [{ cd: 'default', value: 'row x col', row: 0, col: 0 }],
@@ -38,7 +38,9 @@ function useBasicGridLayoutToolbar(props: BasicGridLayoutToolbarProps) {
     const toggleFlag = state.toggleFlag;
     const currScreenWidthPixel = props.currScreenWidthPixel;
     const currColSize = props.currColSize;
-    const minWidthSize = props.minWidthSize != null ? props.minWidthSize : 1;
+    const minWidthSize = props.minWidthSize != null
+        ? (props.currColSize != null && props.minWidthSize > props.currColSize ? props.currColSize : props.minWidthSize)
+        : 1;
     const maxWidthSize = props.maxWidthSize != null ? (
         props.currColSize != null && props.currColSize < props.maxWidthSize
             ? props.currColSize : props.maxWidthSize
@@ -46,7 +48,7 @@ function useBasicGridLayoutToolbar(props: BasicGridLayoutToolbarProps) {
     const minHeightSize = props.minHeightSize != null ? props.minHeightSize : 1;
     const maxHeightSize = props.maxHeightSize;
 
-    const sortItemList: SortItem[] | undefined = currColSize != null ? state.sortItemList : undefined;
+    const sortItemList: ISortItem[] | undefined = currColSize != null ? state.sortItemList : undefined;
     const selectedSortItemIdx = state.selectedSortItemIdx;
 
     const getDivisors = (num: number) => {
@@ -142,7 +144,7 @@ function useBasicGridLayoutToolbar(props: BasicGridLayoutToolbarProps) {
             return;
         }
 
-        let event: BasicGridLayoutToolbarEvent = {
+        let event: IBasicGridLayoutToolbarEvent = {
             type: 'sort',
             data: {
                 sortItem: sortItemList?.[selectedSortItemIdx]
@@ -161,6 +163,6 @@ function useBasicGridLayoutToolbar(props: BasicGridLayoutToolbarProps) {
 export default useBasicGridLayoutToolbar;
 
 export type {
-    BasicGridLayoutToolbarProps,
-    BasicGridLayoutToolbarEvent,
+    IBasicGridLayoutToolbarProps,
+    IBasicGridLayoutToolbarEvent,
 }

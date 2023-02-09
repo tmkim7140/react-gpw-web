@@ -2,7 +2,7 @@
     width: 100%;
     height: 100%;
 
-    @import './components/BasicGridLayoutToolbarUI';
-    @import './components/BasicGridLayoutUI';
-    @import './components/BasicLayoutUI';
+    @import './components/BasicGridLayout';
+    @import './components/basic-layout/BasicLayout';
+    @import './components/basic-grid-layout-toolbar/BasicGridLayoutToolbar';
 }

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Layout, Layouts } from 'react-grid-layout';
-import { BasicGridLayoutToolbarEvent } from './useBasicGridLayoutToolbar';
-import { BasicLayoutEvent, BasicLayoutProps, BasicLayoutTitleBarProps } from './useBasicLayout'
+import { IBasicGridLayoutToolbarEvent } from './useBasicGridLayoutToolbar';
+import { IBasicLayoutCardEvent, IBasicLayoutCardProps, IBasicLayoutCardTitleBarProps } from './useBasicLayoutCard'
 
 type ResizeHandle = 's' | 'w' | 'e' | 'n' | 'sw' | 'nw' | 'se' | 'ne';
 
 let _ = require('lodash');
 // _.cloneDeep(value);
 
-interface BasicGridLayoutOptionProps {
+interface IBasicGridLayoutOptionProps {
     className?: string;
     breakpoints?: {
         [P: string]: number
@@ -26,6 +26,7 @@ interface BasicGridLayoutOptionProps {
         maxW?: number,
         minH?: number,
         maxH?: number,
+        static?: boolean,
     },
     isDraggable?: boolean;
     isResizable?: boolean;
@@ -33,36 +34,42 @@ interface BasicGridLayoutOptionProps {
     allowOverlap?: boolean;
     preventCollision?: boolean;
     resizeHandles?: ResizeHandle[] | undefined;
-    titleBar?: BasicLayoutTitleBarProps,
+    titleBar?: IBasicLayoutCardTitleBarProps,
     hasToolbar?: boolean,
     hasMouseMoveArea?: boolean,
 }
 
-interface BasicGridLayoutSaveEvent {
+interface IBasicGridLayoutEvent {
     type: string,
-    layouts: BasicLayoutProps[],
-    option?: BasicGridLayoutOptionProps,
+    layouts: IBasicLayoutCardProps[],
+    option?: IBasicGridLayoutOptionProps,
 }
 
-interface BasicGridLayoutProps {
-    layouts: BasicLayoutProps[];
-    option?: BasicGridLayoutOptionProps;
-    onSave: (e: BasicGridLayoutSaveEvent) => void;
+interface IBasicGridLayoutProps {
+    layouts: IBasicLayoutCardProps[];
+    option?: IBasicGridLayoutOptionProps;
+    // onSave?: (e: IBasicGridLayoutEvent) => void;
+    // onChange?: (e: IBasicGridLayoutEvent) => void;
+    // onChangeBasicLayoutTitle?: (e: any) => void;
+    onLayoutsSave: (e: IBasicGridLayoutEvent) => void;
+    onCardRemove: (e: IBasicGridLayoutEvent) => void;
+    onCardModify: (e: IBasicGridLayoutEvent) => void; // {moveBy(복수개), titlechange, selected, static}
+    onCardAdd: (e: IBasicGridLayoutEvent) => void;
 }
 
-function useBasicGridLayout(props: BasicGridLayoutProps) {
+function useBasicGridLayout(props: IBasicGridLayoutProps) {
+
     const [state, setState] = useState({
-        layouts: _.cloneDeep(props.layouts),
-        option: _.cloneDeep(props.option),
+        layouts: props.layouts,
+        option: props.option,
         currBreakPoint: '',
-        selectedLayout: {},
     });
 
-    const layoutsToResponsiveLayouts = (layouts: BasicLayoutProps[]): Layouts => {
+    const layoutsToResponsiveLayouts = (layouts: IBasicLayoutCardProps[]): Layouts => {
         let responsiveLayouts: Layouts = {};
         if (state.option?.breakpoints != null) {
             Object.keys(state.option.breakpoints).forEach((key: string) => {
-                responsiveLayouts[key] = layouts.map((layout: BasicLayoutProps) => {
+                responsiveLayouts[key] = layouts.map((layout: IBasicLayoutCardProps) => {
                     let w = layout.geometry[key].w;
                     if (state.option?.layoutOption?.minW != null && state.option?.layoutOption?.minW > w) w = state.option?.layoutOption?.minW;
                     if (state.option?.layoutOption?.maxW != null && state.option?.layoutOption?.maxW < w) w = state.option?.layoutOption?.maxW;
@@ -83,24 +90,20 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
                 });
             });
         }
-
         return responsiveLayouts;
     }
 
     let responsiveLayouts: Layouts = layoutsToResponsiveLayouts(state.layouts);
 
-    const setLayouts = ((layouts: BasicLayoutProps[]) => {
+    const setLayouts = ((layouts: IBasicLayoutCardProps[]) => {
         setState((state) => ({
             ...state,
             layouts: layouts
         }));
     });
 
-    const setOption = ((option: BasicGridLayoutOptionProps) => {
-        setState((state) => ({
-            ...state,
-            option: option
-        }));
+    const setOption = ((option: IBasicGridLayoutOptionProps) => {
+
     });
 
     const setCurrBreakpoint = ((breakpoint: string) => {
@@ -129,14 +132,36 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
         }
     });
 
+    const handleChange = (layouts: IBasicLayoutCardProps[], option?: IBasicGridLayoutOptionProps) => {
+        if (props.onCardModify != null) {
+            let layoutsClone: IBasicLayoutCardProps[] = _.cloneDeep(layouts);
+            let optionClone: IBasicGridLayoutOptionProps = _.cloneDeep(option);
+
+            layoutsClone.forEach((layout: IBasicLayoutCardProps) => {
+                delete layout.onChangeCheck;
+                delete layout.onChangeTitle;
+                delete layout.onClickRemoveBtn;
+                delete layout.onClickStaticBtn;
+                // delete layout.isSelected;
+                delete layout.isTemporary;
+            });
+
+            let e: IBasicGridLayoutEvent = {
+                type: 'change',
+                layouts: layoutsClone,
+                option: optionClone,
+            }
+            props.onCardModify(e);
+        }
+    }
+
     const handleLayoutChange = (currLayouts: Layout[], allLayouts: Layouts) => {
-        if (props.option?.breakpoints == null) return;
+        if (state.option?.breakpoints == null) return;
         if (state.currBreakPoint === '') return;
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-        Object.keys(props.option?.breakpoints).forEach(key => {
+        Object.keys(state.option?.breakpoints).forEach(key => {
             allLayouts[key].forEach((responsiveLayout: Layout) => {
-                let layout: BasicLayoutProps | undefined = layoutsClone.find((layout: BasicLayoutProps) => layout.id === responsiveLayout.i);
+                let layout: IBasicLayoutCardProps | undefined = state.layouts.find((layout: IBasicLayoutCardProps) => layout.id === responsiveLayout.i);
                 if (layout != null) {
                     layout.geometry[key].x = responsiveLayout.x;
                     layout.geometry[key].y = responsiveLayout.y;
@@ -145,24 +170,31 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
                     layout.geometry[key].moved = responsiveLayout.moved;
                     layout.geometry[key].static = responsiveLayout.static;
                 }
-            })
-        })
+            });
+        });
 
-        setLayouts(layoutsClone);
+        let event: IBasicGridLayoutEvent = {
+            type: 'modify',
+            layouts: [...state.layouts]
+        }
+        props.onCardModify(event);
     };
 
     const handleBreakPointChange = (breakpoint: string) => {
-        setCurrBreakpoint(breakpoint);
+        setState((state) => ({
+            ...state,
+            currBreakPoint: breakpoint,
+        }))
     };
 
     const handleClickAddBtn = (e: any) => {
         console.log('BasicGridLayout.handleClickAddBtn');
         let id = uuidv4();
-        let addPosition = getLayoutAddPosition(responsiveLayouts, props.option?.breakpoints)
+        let addPosition = getLayoutAddPosition(responsiveLayouts, state.option?.breakpoints)
 
-        let newLayout: BasicLayoutProps = {
+        let newLayout: IBasicLayoutCardProps = {
             id: id,
-            name: 'newLayout',
+            title: 'newLayout',
             geometry: {
                 lg: { x: 0, y: 0, w: 1, h: 1, static: false },
                 md: { x: 0, y: 0, w: 1, h: 1, static: false },
@@ -170,20 +202,23 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
                 xs: { x: 0, y: 0, w: 1, h: 1, static: false },
                 xxs: { x: 0, y: 0, w: 1, h: 1, static: false },
             },
-            innerJSX: (<div>{id}</div>)
+            innerJSX: (<div></div>)
         }
-        if (props.option?.breakpoints != null) {
-            Object.keys(props.option.breakpoints).forEach(key => {
+        if (state.option?.breakpoints != null) {
+            Object.keys(state.option.breakpoints).forEach(key => {
                 newLayout.geometry[key].x = addPosition[key].x;
                 newLayout.geometry[key].y = addPosition[key].y;
             })
         }
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+        let event: IBasicGridLayoutEvent = {
+            type: 'modify',
+            layouts: [newLayout],
+        }
+        props.onCardAdd(event);
 
-        layoutsClone.push(newLayout)
-
-        setLayouts(layoutsClone);
+        state.layouts.push(newLayout)
+        setLayouts([...state.layouts]);
     }
 
     const handleClickModifyBtn = (e: any) => {
@@ -193,58 +228,71 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
     const handleClickRemoveBtn = (e: any) => {
         console.log('BasicGridLayout.handleClickRemoveBtn',);
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === (state.selectedLayout as BasicLayoutProps).id);
+        let removeLayouts: IBasicLayoutCardProps[] = [];
+        let idxList = state.layouts.reduce((idxList: number[], layout, idx) => {
+            if (layout.isSelected != null && layout.isSelected) {
+                removeLayouts.push(layout);
+                idxList.push(idx);
+            }
+            return idxList;
+        }, []);
 
-        if (idx < 0) {
+        if (idxList.length < 0) {
             alert("!! error - 선택된 레이아웃이 없습니다 !!");
             return;
         }
 
-        layoutsClone.splice(idx, 1);
+        let event: IBasicGridLayoutEvent = {
+            type: 'remove',
+            layouts: [...removeLayouts],
+        }
+        props.onCardRemove(event);
 
-        setLayouts(layoutsClone)
+        idxList.sort().reverse().forEach(idx => {
+            state.layouts.splice(idx, 1);
+        });
 
+        setLayouts([...state.layouts]);
     }
 
     const handleClickSaveBtn = (e: any) => {
         console.log('BasicGridLayout.handleClickSaveBtn');
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-        let optionClone: BasicGridLayoutOptionProps = _.cloneDeep(state.option);
+        if (props.onLayoutsSave != null) {
+            let layoutsClone: IBasicLayoutCardProps[] = _.cloneDeep(state.layouts);
+            let optionClone: IBasicGridLayoutOptionProps = _.cloneDeep(state.option);
 
-        layoutsClone.forEach((layout: BasicLayoutProps) => {
-            delete layout.onChangeCheck;
-            delete layout.onChangeTitle;
-            delete layout.onClickRemoveBtn;
-            delete layout.onClickStaticBtn;
-            delete layout.isSelected;
-            delete layout.isTemporary;
-        });
+            layoutsClone.forEach((layout: IBasicLayoutCardProps) => {
+                delete layout.onChangeCheck;
+                delete layout.onChangeTitle;
+                delete layout.onClickRemoveBtn;
+                delete layout.onClickStaticBtn;
+                // delete layout.isSelected;
+                delete layout.isTemporary;
+            });
 
-        if (props.onSave != null) {
-            let e: BasicGridLayoutSaveEvent = {
+            let e: IBasicGridLayoutEvent = {
                 type: 'save',
                 layouts: layoutsClone,
                 option: optionClone,
             }
-            props.onSave(e);
+            props.onLayoutsSave(e);
         }
     }
 
-    const handleClickSortBtn = (e: BasicGridLayoutToolbarEvent) => {
+    const handleClickSortBtn = (e: IBasicGridLayoutToolbarEvent) => {
         console.log("handleClickSortBtn : ", e);
 
-        let colSize = state.option.cols[state.currBreakPoint];
+        let colSize = state.option!.cols![state.currBreakPoint];
         let col = e.data.sortItem.col;
         // let row = e.data.sortItem.row;
         let width = colSize / col;
-        let height = state.option.layoutOption.minH;
+        let height = state.option!.layoutOption!.minH!;
         let x = 0;
         let y = 0;
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-        layoutsClone.forEach((layout: BasicLayoutProps) => {
+        let layoutsClone: IBasicLayoutCardProps[] = _.cloneDeep(state.layouts);
+        layoutsClone.forEach((layout: IBasicLayoutCardProps) => {
             layout.geometry[state.currBreakPoint].x = x;
             layout.geometry[state.currBreakPoint].y = y;
             layout.geometry[state.currBreakPoint].w = width;
@@ -255,64 +303,82 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
                 y += height;
             }
         });
-        setLayouts(layoutsClone);
-    }
 
-    const handleChangeTitleFromLayout = (e: BasicLayoutEvent) => {
-        if (e.htmlEvent.target == null) return;
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-
-        let value = (e.htmlEvent.target as HTMLInputElement).value;
-
-        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
-        if (idx > -1) {
-            if (layoutsClone[idx].titleBar == null) layoutsClone[idx].titleBar = { title: value };
-            else layoutsClone[idx].titleBar!.title = value;
+        let event: IBasicGridLayoutEvent = {
+            type: 'modify',
+            layouts: [...layoutsClone]
         }
+        props.onCardModify(event);
 
         setLayouts(layoutsClone);
     }
 
-    const handleChangeCheckFromLayout = (e: BasicLayoutEvent) => {
+    const handleChangeTitleFromLayout = (e: IBasicLayoutCardEvent) => {
         if (e.htmlEvent.target == null) return;
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
+
+        let idx = state.layouts.findIndex((layout: IBasicLayoutCardProps) => layout.id === e.layout.id);
+        if (idx > -1) state.layouts[idx] = e.layout;
+
+        let event: IBasicGridLayoutEvent = {
+            type: 'modify',
+            layouts: [e.layout]
+        }
+        props.onCardModify(event);
+    }
+
+    const handleChangeCheckFromLayout = (e: IBasicLayoutCardEvent) => {
+        if (e.htmlEvent.target == null) return;
 
         let checked = (e.htmlEvent.target as HTMLInputElement).checked;
 
-        let beforeIdx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === (state.selectedLayout as BasicLayoutProps).id);
-        if (beforeIdx > -1) layoutsClone[beforeIdx].isSelected = false;
+        let modLayouts: IBasicLayoutCardProps[] = [];
 
-        let currIdx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
-        if (currIdx > -1) layoutsClone[currIdx].isSelected = checked;
+        let currIdx = state.layouts.findIndex((layout: IBasicLayoutCardProps) => layout.id === e.layout.id);
+        if (currIdx > -1) {
+            state.layouts[currIdx].isSelected = checked;
+            modLayouts.push(state.layouts[currIdx]);
+        }
 
-        setState((state) => ({
-            ...state,
-            layouts: layoutsClone,
-            selectedLayout: layoutsClone[currIdx]
-        }));
+        let event: IBasicGridLayoutEvent = {
+            type: 'modify',
+            layouts: modLayouts
+        }
+
+        props.onCardModify(event);
     }
 
-    const handleClickRemoveBtnFromLayout = (e: BasicLayoutEvent) => {
+    const handleClickRemoveBtnFromLayout = (e: IBasicLayoutCardEvent) => {
         console.log("handleClickRemoveBtnFromLayout : ", e);
         if (e.layout == null || e.layout.id == null) return;
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
+        let layoutsClone: IBasicLayoutCardProps[] = _.cloneDeep(state.layouts);
+        let idx = layoutsClone.findIndex((layout: IBasicLayoutCardProps) => layout.id === e.layout.id);
+
+        let removeLayout = layoutsClone[idx];
+        let event: IBasicGridLayoutEvent = {
+            type: 'remove',
+            layouts: [removeLayout],
+        }
+        props.onCardRemove(event);
 
         layoutsClone.splice(idx, 1);
-
         setLayouts(layoutsClone)
     }
 
-    const handleClickStaticBtnFromLayout = (e: BasicLayoutEvent) => {
+    const handleClickStaticBtnFromLayout = (e: IBasicLayoutCardEvent) => {
         console.log("handleClickStaticBtnFromLayout : ", e);
 
-        let layoutsClone: BasicLayoutProps[] = _.cloneDeep(state.layouts);
-        let idx = layoutsClone.findIndex((layout: BasicLayoutProps) => layout.id === e.layout.id);
+        let idx = state.layouts.findIndex((layout: IBasicLayoutCardProps) => layout.id === e.layout.id);
 
-        layoutsClone[idx].isStatic = layoutsClone[idx].isStatic == null ? true : !(layoutsClone[idx].isStatic);
+        state.layouts[idx].isStatic = state.layouts[idx].isStatic == null ? true : !(state.layouts[idx].isStatic);
 
-        setLayouts(layoutsClone)
+        let event: IBasicGridLayoutEvent = {
+            type: 'modify',
+            layouts: [state.layouts[idx]]
+        }
+        props.onCardModify(event);
+
+        setLayouts([...state.layouts]);
     }
 
     function uuidv4() {
@@ -351,6 +417,10 @@ function useBasicGridLayout(props: BasicGridLayoutProps) {
         initLayoutList();
     }, []);
 
+    useEffect(() => {
+        setLayouts(props.layouts);
+    }, [props.layouts])
+
     return {
         state, responsiveLayouts,
         handleLayoutChange, handleBreakPointChange,
@@ -363,7 +433,7 @@ export default useBasicGridLayout;
 
 export type {
     ResizeHandle,
-    BasicGridLayoutOptionProps,
-    BasicGridLayoutSaveEvent,
-    BasicGridLayoutProps
+    IBasicGridLayoutOptionProps,
+    IBasicGridLayoutEvent,
+    IBasicGridLayoutProps
 }

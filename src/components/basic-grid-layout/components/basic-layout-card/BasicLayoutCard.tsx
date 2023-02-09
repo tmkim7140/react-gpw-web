@@ -4,32 +4,31 @@ import {
     PushpinOutlined,
     ToTopOutlined,
 } from '@ant-design/icons';
+import { IBasicLayoutCardEvent, IBasicLayoutCardTitleBarProps } from '../../hooks/useBasicLayoutCard';
 
 let _ = require('lodash');
 
-interface BasicLayoutUIProps {
+interface IBasicLayoutCardUIProps {
+    id: string;
     title: string;
+    geometry: { [P: string]: { x: number, y: number, w: number, h: number, moved?: boolean, static?: boolean } };
     innerJSX: JSX.Element;
-    hasTitleBar?: boolean;
-    hasCheckbox?: boolean;
-    hasDeleteBtn?: boolean;
-    hasStaticBtn?: boolean;
+    isTemporary?: boolean; // 저장되지 않은 상태 : true
+    isSelected?: boolean; // default : false
+    isStatic?: boolean; // 고정 
+    titleBar?: IBasicLayoutCardTitleBarProps;
     hasMouseMoveArea?: boolean;
-    isSelected?: boolean;
-    isStatic?: boolean;
-    onChangeTitle?: (e: any) => void
-    onChangeCheck?: (e: any) => void;
-    onClickRemoveButton?: (e: any) => void;
-    onClickStaticButton?: (e: any) => void;
+    onChangeTitle?(e: any): void;
+    onChangeCheck?(e: any): void;
+    onClickRemoveBtn?(e: any): void;
+    onClickStaticBtn?(e: any): void;
 }
 
-function BasicLayoutUIByAntd(props: BasicLayoutUIProps) {
-    let title = _.cloneDeep(props.title);
-
+function BasicLayoutCard(props: IBasicLayoutCardUIProps) {
     return (
-        <Card className={'basic-layout'}
+        <Card className={`basic-layout ${(props.isStatic == null || !props.isStatic) ? 'cursor-move' : ''}`}
             title={
-                props.hasTitleBar != null && props.hasTitleBar ? (
+                props.titleBar != null ? (
                     <Row className={'bl-header'}
                         justify={'space-between'}
                     >
@@ -37,7 +36,7 @@ function BasicLayoutUIByAntd(props: BasicLayoutUIProps) {
                             span={16}
                         >
                             {
-                                props.hasCheckbox != null && props.hasCheckbox != null ? (
+                                props.titleBar != null && props.titleBar.hasCheckbox ? (
                                     <Space onMouseDown={(e) => e.stopPropagation()}>
                                         <Checkbox className={'checkbox-input'}
                                             checked={props.isSelected}
@@ -47,10 +46,11 @@ function BasicLayoutUIByAntd(props: BasicLayoutUIProps) {
                                 ) : ('')
                             }
                             <Input className="title-input"
-                                value={title != null ? title : ''}
+                                // value={props.title != null ? props.title : ''}
+                                value={props.title != null ? props.title : ''}
                                 onChange={(e) => props.onChangeTitle != null ? props.onChangeTitle(e) : ''}
                                 onMouseDown={(e) => e.stopPropagation()}
-                                disabled={title == null}
+                                disabled={props.title == null}
                                 placeholder="title"
                             />
                         </Col>
@@ -59,18 +59,18 @@ function BasicLayoutUIByAntd(props: BasicLayoutUIProps) {
                             span={6}
                         >
                             {
-                                props.hasDeleteBtn != null && props.hasDeleteBtn != null ? (
+                                props.titleBar != null && props.titleBar.hasDeleteBtn != null ? (
                                     <Button className={`tool-btn`}
-                                        onClick={props.onClickRemoveButton}
+                                        onClick={props.onClickRemoveBtn}
                                         onMouseDown={(e) => e.stopPropagation()}>
                                         <DeleteOutlined />
                                     </Button>
                                 ) : ('')
                             }
                             {
-                                props.hasStaticBtn != null ? (
+                                props.titleBar != null && props.titleBar.hasStaticBtn != null ? (
                                     <Button className={`tool-btn`}
-                                        onClick={props.onClickStaticButton}
+                                        onClick={props.onClickStaticBtn}
                                         onMouseDown={(e) => e.stopPropagation()}>
                                         {
                                             props.isStatic != null && props.isStatic
@@ -84,28 +84,28 @@ function BasicLayoutUIByAntd(props: BasicLayoutUIProps) {
                     </Row>
                 ) : ('')
             }
-            // size={'small'}
-            style={{}}
+            style={{ width: '100%', height: '100%' }}
             headStyle={{ width: '100%', minHeight: '45px', backgroundColor: '#eaaf', padding: '6px', margin: '0' }}
             bodyStyle={{ flex: '1', width: '100%', height: 'auto', backgroundColor: '#ffaf', padding: '6px' }}
         >
-
-            <Space className={'bl-body'} onMouseDown={(e) => e.stopPropagation()} style={{ cursor: 'default' }}>
+            <div className={'bl-body'} onMouseDown={(e) => e.stopPropagation()} style={{ cursor: 'default', width: '100%', height: '100%' }}>
                 {props.innerJSX}
-            </Space>
+            </div>
             {
-                props.hasMouseMoveArea != null && props.hasMouseMoveArea ? (
-                    <Space className={'mouse-move-area cursor-move'}>
-                        ●
-                    </Space>
-                ) : ('')
+                (props.hasMouseMoveArea != null && !props.hasMouseMoveArea) || (props.isStatic != null && props.isStatic)
+                    ? ('')
+                    : (
+                        <Space className={'mouse-move-area cursor-move'}>
+                            ●
+                        </Space>
+                    )
             }
         </Card>
     )
 }
 
-export default BasicLayoutUIByAntd;
+export default BasicLayoutCard;
 
 export type {
-    BasicLayoutUIProps,
+    IBasicLayoutCardUIProps,
 }

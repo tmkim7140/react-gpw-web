@@ -1,70 +1,122 @@
-import BasicGridLayout, { BasicGridLayoutProps, BasicGridLayoutSaveEvent } from '@/src/components/basic-grid-layout/BasicGridLayout'
+import { BasicGridLayout, IBasicGridLayoutProps, IBasicGridLayoutEvent } from '@/src/components/basic-grid-layout';
+import { IBasicLayoutCardProps } from '@/src/components/basic-grid-layout/hooks/useBasicLayoutCard';
+import { BasicCard } from '@/src/components/basic-card';
 
-import { useState } from 'react';
+import { CONTENT_TYPE } from '@/src/components/basic-card/components/select-content-type/hooks/useSelectContentType';
+
+import { useQueryClient } from 'react-query';
+import queryKeys from '@/src/queries/querykeys';
+import useSelectorGridLayoutQuery from '@/src/queries/selector-grid-layout/useSelectorGridLayoutQuery';
+import { useEffect, useState } from 'react';
+import { IBasicCardEvent } from '@/src/components/basic-card/hooks/useBasicCard';
+
+let _ = require('lodash');
+
+interface ISelectorGridLayout {
+    id: string;
+    title: string;
+    geometry: { [P: string]: { x: number, y: number, w: number, h: number, moved?: boolean, static?: boolean } };
+    isSelected?: boolean,
+    isStatic?: boolean,
+    card: {
+        title: string;
+        type: CONTENT_TYPE;
+    }
+}
 
 function Test() {
+    const queryClient = useQueryClient();
 
-    const handleSaveBasicGridLayout = (e: BasicGridLayoutSaveEvent) => {
+    const { useSelectSelectorGridLayout, useUpdateSelectorGridLayout } = useSelectorGridLayoutQuery();
+    const selectSelectorGridLayout = useSelectSelectorGridLayout({
+        storeCode: [],
+        options: {
+            onError: () => { },
+            onSuccess: () => { }
+        }
+    });
+    const updateSelectorGridLayout = useUpdateSelectorGridLayout({
+        storeCode: [],
+        options: {
+            onMutate(variabls) {
+                return variabls;
+            },
+            onSettled(data, error, variables, context) {
+
+            },
+            onError: () => {
+                console.log("updateSelectorGridLayout.onError")
+            },
+            onSuccess: () => {
+                console.log("updateSelectorGridLayout.onSuccess : ")
+                queryClient.invalidateQueries([queryKeys.selectorGridLayout.all, []]);
+            }
+        }
+    })
+
+    const [layouts, setLayouts] = useState<ISelectorGridLayout[]>(_.cloneDeep(selectSelectorGridLayout.data));
+
+    const bglLayoutsToLayouts = (bglLayouts: IBasicLayoutCardProps[]): ISelectorGridLayout[] => {
+        return bglLayouts.map((bglLayout: IBasicLayoutCardProps) => {
+            let idx = layouts.findIndex(layout => layout.id == bglLayout.id);
+            let newLayout: ISelectorGridLayout = {
+                id: bglLayout.id,
+                title: bglLayout.title,
+                geometry: bglLayout.geometry,
+                isSelected: bglLayout.isSelected,
+                isStatic: bglLayout.isStatic,
+                card: {
+                    title: idx > -1 ? layouts[idx].card.title : '',
+                    type: idx > -1 ? layouts[idx].card.type : CONTENT_TYPE.NONE,
+                }
+            }
+
+            return newLayout;
+        });
+    }
+
+    const handleLayoutsSave = (e: IBasicGridLayoutEvent) => {
         if (confirm('저장하시겠습니까?')) { //eslint-disable-line
-            setState((state) => ({
-                ...state,
-                layouts: e.layouts,
-                option: e.option
-            }));
+            let newLayouts: ISelectorGridLayout[] = bglLayoutsToLayouts(e.layouts);
+
+            updateSelectorGridLayout.mutate(newLayouts);
         }
     }
 
-    const props: BasicGridLayoutProps = {
-        layouts: [
-            {
-                id: 'test_0',
-                name: '레이아웃_0',
-                geometry: {
-                    lg: { x: 0, y: 0, w: 1, h: 1, static: false },
-                    md: { x: 0, y: 0, w: 1, h: 1, static: false },
-                    sm: { x: 0, y: 0, w: 1, h: 1, static: false },
-                    xs: { x: 0, y: 0, w: 1, h: 1, static: false },
-                    xxs: { x: 0, y: 0, w: 1, h: 1, static: false },
-                },
-                innerJSX: (<div>innerJSX_0</div>)
-            },
-            {
-                id: 'test_1',
-                name: '레이아웃_1',
-                geometry: {
-                    lg: { x: 0, y: 0, w: 2, h: 1, static: false },
-                    md: { x: 0, y: 0, w: 2, h: 1, static: false },
-                    sm: { x: 0, y: 0, w: 2, h: 1, static: false },
-                    xs: { x: 0, y: 0, w: 2, h: 1, static: false },
-                    xxs: { x: 0, y: 0, w: 2, h: 1, static: false },
-                },
-                innerJSX: (<div>innerJSX_1</div>)
-            },
-            {
-                id: 'test_2',
-                name: '레이아웃_2',
-                geometry: {
-                    lg: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    md: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    sm: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    xs: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    xxs: { x: 0, y: 0, w: 3, h: 1, static: false },
-                },
-                innerJSX: (<div>innerJSX_2</div>)
-            },
-            {
-                id: 'test_3',
-                name: '레이아웃_3',
-                geometry: {
-                    lg: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    md: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    sm: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    xs: { x: 0, y: 0, w: 3, h: 1, static: false },
-                    xxs: { x: 0, y: 0, w: 3, h: 1, static: false },
-                },
-                innerJSX: (<div>innerJSX_3</div>)
-            }
-        ],
+    const handleCardAdd = (e: IBasicGridLayoutEvent) => {
+        console.log('handleCardAdd: ', e);
+
+        let newLayouts: ISelectorGridLayout[] = bglLayoutsToLayouts(e.layouts);
+
+        layouts.push(...newLayouts);
+        setLayouts([...layouts]);
+    }
+
+    const handleCardModify = (e: IBasicGridLayoutEvent) => {
+        if (e.layouts == null) return;
+
+        let modLayouts: ISelectorGridLayout[] = bglLayoutsToLayouts(e.layouts);
+
+        modLayouts.forEach(modLayout => {
+            let idx = layouts.findIndex(layout => layout.id == modLayout.id);
+            layouts[idx] = modLayout;
+        });
+    }
+
+    const handleCardRemove = (e: IBasicGridLayoutEvent) => {
+        let idxList = e.layouts.reduce((idxList, bglLayout) => {
+            let idx = layouts.findIndex(layout => layout.id == bglLayout.id);
+            if (idx > -1) idxList.push(idx);
+            return idxList;
+        }, [] as number[]);
+
+        idxList.sort().reverse().forEach(idx => {
+            layouts.splice(idx, 1);
+        });
+    }
+
+    const basicGridLayoutProps: IBasicGridLayoutProps = {
+        layouts: [],
         option: {
             className: 'custom-basic-grid-layout',
             breakpoints: {
@@ -80,7 +132,7 @@ function Test() {
             padding: [10, 10],
             layoutOption: {
                 margin: [10, 10],
-                minW: 2,
+                minW: 4,
                 maxW: 12,
                 minH: 2,
                 maxH: 6,
@@ -99,20 +151,61 @@ function Test() {
             hasToolbar: true,
             hasMouseMoveArea: true,
         },
-        onSave: handleSaveBasicGridLayout,
+        onCardAdd: handleCardAdd,
+        onCardModify: handleCardModify, // {moveBy, titlechange, selected, static}
+        onCardRemove: handleCardRemove,
+        onLayoutsSave: handleLayoutsSave,
     };
 
-    const [state, setState] = useState({
-        layouts: props.layouts,
-        option: props.option,
-    });
+    const handleTitleModify = (e: IBasicCardEvent) => {
+        let idx = layouts.findIndex((layout: ISelectorGridLayout) => layout.id == e.card.id);
+        if (idx >= 0) layouts[idx].card.title = e.card.title!;
+    }
+
+    const handleContentTypeModify = (e: IBasicCardEvent) => {
+        let idx = layouts.findIndex((layout: ISelectorGridLayout) => layout.id == e.card.id);
+        if (idx >= 0) layouts[idx].card.type = e.card.contentType!;
+    }
+
+    const initBasicGridLayouts = () => {
+        if (layouts == null) return;
+
+        basicGridLayoutProps.layouts = layouts.map((layout: ISelectorGridLayout) => {
+            let newLayout: IBasicLayoutCardProps = {
+                id: layout.id,
+                title: layout.title,
+                geometry: layout.geometry,
+                isSelected: layout.isSelected,
+                isStatic: layout.isStatic,
+                innerJSX: (
+                    <BasicCard
+                        id={layout.id}
+                        title={layout.card.title}
+                        contentType={layout.card.type}
+                        onTitleModify={handleTitleModify}
+                        onContentTypeModify={handleContentTypeModify}
+                    />
+                ),
+            }
+
+            return newLayout;
+        });
+    }
+
+    initBasicGridLayouts();
+
+    useEffect(() => {
+        if (selectSelectorGridLayout.isSuccess) {
+            setLayouts(_.cloneDeep(selectSelectorGridLayout.data));
+        }
+    }, [selectSelectorGridLayout.data]);
 
     return (
-        <BasicGridLayout
-            layouts={state.layouts}
-            option={state.option}
-            onSave={props.onSave}
-        />
+        selectSelectorGridLayout.isLoading
+            ? <div>...isLoading</div>
+            : selectSelectorGridLayout.isError
+                ? <div>!! isError !!</div>
+                : <BasicGridLayout {...basicGridLayoutProps} />
     )
 }
 
