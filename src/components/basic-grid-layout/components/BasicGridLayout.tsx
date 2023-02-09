@@ -30,7 +30,7 @@ function BasicGridLayout(props: IBasicGridLayoutUIProps) {
                     ) : ('')
                 }
                 <Layout className={'content-area'}>
-                    <ResponsiveGridLayout style={{ width: '100%', height: '100%' }}
+                    <ResponsiveGridLayout
                         className={props.responsiveGridLayout.className}
                         layouts={props.responsiveGridLayout.layouts}
                         breakpoints={props.responsiveGridLayout.breakpoints}
