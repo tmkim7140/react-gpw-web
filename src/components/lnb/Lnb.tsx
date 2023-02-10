@@ -1,4 +1,7 @@
-import { LnbProps, LnbMenuListProps, SvcBoxProps, SvcBoxHeaderProps, SvcBoxBodyProps, SvcBoxBodySectionProps } from './types';
+import type { LnbProps } from './types';
+
+import { LnbMenuList } from './components/lnb-menu-list';
+import { SvcBox } from './components/svc-box';
 
 import {
     FormOutlined,
@@ -7,7 +10,6 @@ import {
     MenuOutlined,
 } from '@ant-design/icons';
 
-/* LnbMenuList 컴포넌트 STA */
 const lnbMenuRowdatas = [
     { id: '0', nm: '전자우편', link: '#none' },
     { id: '1', nm: '전자결재', link: '#none' },
@@ -23,23 +25,6 @@ const lnbMenuRowdatas = [
     { id: '11', nm: '파일함', link: '#none' },
 ];
 
-const LnbMenuList = ( props: LnbMenuListProps ) => {
-
-    const renderItems = props.rowdatas.map( ( rowdata, idx ) => 
-        <li key={ rowdata.id } className={ 'nt nt-' + ( idx + 1 ) }>
-            <a href={ rowdata.link }> { rowdata.nm } </a>
-        </li>
-    );
-
-    return (
-        <ul id='lnb-menu-list' className='lnb-menu-list'>
-            { renderItems }
-        </ul>
-    );
-}
-/* LnbMenuList 컴포넌트 END */
-
-/* SvcBox 컴포넌트 STA */
 const svcBoxPropsData = {
     header: {
         title: '전체 서비스',
@@ -242,43 +227,6 @@ const svcBoxPropsData = {
     }
 };
 
-const SvcBox = ( props: SvcBoxProps ) => {
-
-    const Header = ( props: SvcBoxHeaderProps ) => <div className='svc-box-header'> <h2> { props.title } </h2> </div>;
-    
-    const renderBodySection = ( props: SvcBoxBodySectionProps ) => {
-
-        let BodySectionItem;
-
-        if( props.type === 'list' ) {
-            BodySectionItem = props.rowdatas.map( item => 
-                <div className='svc-list'> 
-                    <div className='svc-list-title'> <a href={ item.link }> { item.title } </a> </div>
-                    <div className='svc-list-content'>
-                        <ul>
-                            { ( item.childrens == null || item.childrens.length === 0 ) ? '' : item.childrens.map( item => <li> <a href={ item.link }> { item.title } </a> </li>) }
-                        </ul>
-                    </div>
-                </div> 
-            )
-        }
-        else if( props.type === 'link' ) BodySectionItem =  <div className='svc-link'> <ul> { props.rowdatas.map( item => <li> <a href={ item.link }> { item.title } </a> </li> ) } </ul> </div>;
-
-        return <div className='svc-box-div'> { BodySectionItem } </div>;
-    };
-
-    const Body = ( props: SvcBoxBodyProps ) => <div className='svc-box-body'> { props.sectionList.map( selection => renderBodySection( selection ) ) } </div>;
-    
-    return (
-        <div id='svc_box' className='svc-box'>
-            <div className='svc-box-wrap'>
-                <Header {... props.header} />
-                <Body {... props.body } />
-            </div>
-        </div>
-    );
-}
-/* SvcBox 컴포넌트 END */
 
 const Lnb = ( props: LnbProps ) => {
 

@@ -7,6 +7,17 @@
       "dom.iterable",
       "esnext"
     ],
+
+    // "declaration": true,
+    // "declarationDir": "./types",
+    // "outDir": "types",
+    // "declarationMap": true,
+    // "emitDeclarationOnly": true,
+
+    // "typeRoots": [
+    //   "./types"
+    // ],
+
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -22,8 +33,9 @@
     "jsx": "react-jsx"
   },
   "include": [
+    "types",
     "src",
-    "craco.config.js"
+    // "craco.config.js"
   ],
   "exclude": [
     "node_modules"
